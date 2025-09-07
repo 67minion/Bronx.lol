@@ -8,16 +8,16 @@ local StarterGui = game:GetService("StarterGui")
 
 StarterGui:SetCore("SendNotification", {
     Title = "script loading..",
-    Text = "wait 3 seconds to load",
-    Duration = 3, -- seconds the notification stays on screen
+    Text = "wait 2 seconds to load...",
+    Duration = 2, -- seconds the notification stays on screen
     Button1 = "Got it"
 })
 
 
-task.wait(3)
+task.wait(2)
 StarterGui:SetCore("SendNotification", {
     Title = "❗",
-    Text = "leaked by .gg/sleepyhub 𝟔𝟕𝐦𝐢𝐧𝐢𝐨𝐧 uploaded it tho🥷",
+    Text = "leaked by .gg/sleepyhub 67minion uploaded it tho",
     Duration = 3, -- seconds the notification stays on screen
     Button1 = "Got it"
 })
@@ -15985,3 +15985,4 @@ if hookfunction and not Solara and LPH_OBFUSCATED and Game_Name == "South Bronx"
     end)
 
 end
+
