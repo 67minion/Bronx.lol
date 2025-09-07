@@ -14286,9 +14286,9 @@ if Game_Name == "The Bronx" then
             end
 
             do -- \\ Players Tab
-    local Column = PlayersTab:column({size = 'auto'}) -- Single column with auto size to fit content
+    local Column = PlayersTab:column({size = 1}) -- Single column with size 1 to fill available space
 
-    local PlayerListSection = Column:section({name = "Select Player", size = 1, default = false, side = 'left', icon = GetImage("People.png")}) -- Icon assumed for player selection
+    local PlayerListSection = Column:section({name = "Select Player", size = 0.3, default = false, side = 'left', icon = GetImage("People.png")})
 
     local PlayerList = PlayerListSection:list({flag = "SelectPlayer_TheBronx", options = {}, callback = function(state)
         Config.TheBronx.PlayerUtilities.SelectedPlayer = tostring(state)
@@ -14310,7 +14310,7 @@ if Game_Name == "The Bronx" then
     Players.PlayerAdded:Connect(RefreshPlayers)
     Players.PlayerRemoving:Connect(RefreshPlayers)
 
-    local GeneralOptionsSection = Column:section({name = "General Options", size = 1, default = false, side = 'left', icon = GetImage("Wrench.png")})
+    local GeneralOptionsSection = Column:section({name = "General Options", size = 0.2, default = false, side = 'left', icon = GetImage("Wrench.png")})
     
     GeneralOptionsSection:toggle({type = "toggle", name = "Spectate Player", flag = "SpectatePlayer_TheBronx", default = false, callback = function(state)
         Config.TheBronx.PlayerUtilities.SpectatePlayer = state
@@ -14320,7 +14320,7 @@ if Game_Name == "The Bronx" then
         Config.TheBronx.PlayerUtilities.BringingPlayer = state
     end})
 
-    local PassSection = Column:section({name = "Pass Options", size = 1, default = false, side = 'left'})
+    local PassSection = Column:section({name = "Pass Options", size = 0.2, default = false, side = 'left'})
 
     PassSection:button({name = "Pass to Selected Player", callback = function()
         local username = Config.TheBronx.PlayerUtilities.SelectedPlayer
@@ -14347,7 +14347,7 @@ if Game_Name == "The Bronx" then
         end
     end})
 
-    local BugKillSection = Column:section({name = "Bug / Kill Options", size = 1, default = false, side = 'left'})
+    local BugKillSection = Column:section({name = "Bug / Kill Options", size = 0.3, default = false, side = 'left'})
     
     BugKillSection:toggle({type = "toggle", name = "Bug / Kill Player - Car", flag = "BugPlayer_TheBronx", default = false, callback = function(state)
         Config.TheBronx.PlayerUtilities.BugPlayer = state
@@ -14361,7 +14361,7 @@ if Game_Name == "The Bronx" then
         Config.TheBronx.PlayerUtilities.AutoRagdoll = state
     end})
 
-    local PlayerActionsSection = Column:section({name = "Player Actions", size = 1, default = false, side = 'left'})
+    local PlayerActionsSection = Column:section({name = "Player Actions", size = 0.4, default = false, side = 'left'})
 
     PlayerActionsSection:button({name = "Teleport To Player", callback = function()
         task.spawn(Teleport, Players[Config.TheBronx.PlayerUtilities.SelectedPlayer].Character.HumanoidRootPart.CFrame)
