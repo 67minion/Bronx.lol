@@ -14286,133 +14286,127 @@ if Game_Name == "The Bronx" then
             end
 
             do -- \\ Players Tab
-                local Column = PlayersTab:column({})
+    local Column = PlayersTab:column({size = 'auto'}) -- Single column with auto size to fit content
 
-                local PlayerListSection = Column:section({name = "Select Player", size = 1, default = false, side = 'left' --[[3 people icon]]})
+    local PlayerListSection = Column:section({name = "Select Player", size = 1, default = false, side = 'left', icon = GetImage("People.png")}) -- Icon assumed for player selection
 
-                local PlayerList = PlayerListSection:list({flag = "SelectPlayer_TheBronx", options = {}, callback = function(state)
-                    Config.TheBronx.PlayerUtilities.SelectedPlayer = tostring(state)
-                end})
+    local PlayerList = PlayerListSection:list({flag = "SelectPlayer_TheBronx", options = {}, callback = function(state)
+        Config.TheBronx.PlayerUtilities.SelectedPlayer = tostring(state)
+    end})
 
-                local RefreshPlayers = LPH_NO_VIRTUALIZE(function()
-                    local Cache = {}
+    local RefreshPlayers = LPH_NO_VIRTUALIZE(function()
+        local Cache = {}
 
-                    for i, Player in Players:GetPlayers() do
-                        if Player == LocalPlayer then continue end
+        for i, Player in Players:GetPlayers() do
+            if Player == LocalPlayer then continue end
+            table.insert(Cache, Player.Name)
+        end
 
-                        table.insert(Cache, Player.Name)
-                    end
+        table.sort(Cache)
+        PlayerList.refresh_options(Cache)
+    end)
 
-                    table.sort(Cache)
+    task.spawn(RefreshPlayers)
+    Players.PlayerAdded:Connect(RefreshPlayers)
+    Players.PlayerRemoving:Connect(RefreshPlayers)
 
-                    PlayerList.refresh_options(Cache)
-                end)
+    local GeneralOptionsSection = Column:section({name = "General Options", size = 1, default = false, side = 'left', icon = GetImage("Wrench.png")})
+    
+    GeneralOptionsSection:toggle({type = "toggle", name = "Spectate Player", flag = "SpectatePlayer_TheBronx", default = false, callback = function(state)
+        Config.TheBronx.PlayerUtilities.SpectatePlayer = state
+    end})
 
-                task.spawn(RefreshPlayers)
+    GeneralOptionsSection:toggle({type = "toggle", name = "Bring Player", flag = "BringPlayer_TheBronx", default = false, callback = function(state)
+        Config.TheBronx.PlayerUtilities.BringingPlayer = state
+    end})
 
-                Players.PlayerAdded:Connect(RefreshPlayers)
+    local PassSection = Column:section({name = "Pass Options", size = 1, default = false, side = 'left'})
 
-                Players.PlayerRemoving:Connect(RefreshPlayers)
+    PassSection:button({name = "Pass to Selected Player", callback = function()
+        local username = Config.TheBronx.PlayerUtilities.SelectedPlayer
+        if username then
+            Players.LocalPlayer:Chat("/passto " .. username)
+        end
+    end})
 
-                Column = PlayersTab:column({})
-
-                local GeneralOptionsSection = Column:section({name = "General Options", size = 1, default = false, side = 'right', icon = GetImage("Wrench.png")})
-                
-                GeneralOptionsSection:toggle({type = "toggle", name = "Spectate Player", flag = "SpectatePlayer_TheBronx", default = false, callback = function(state)
-                    Config.TheBronx.PlayerUtilities.SpectatePlayer = state
-                end})
-
-                GeneralOptionsSection:toggle({type = "toggle", name = "Bring Player", flag = "BringPlayer_TheBronx", default = false, callback = function(state)
-                    Config.TheBronx.PlayerUtilities.BringingPlayer = state
-                end})
-
-                local BugKillSection = Column:section({name = "Bug / Kill Options", size = 1, default = false, side = 'right'})
-                
-                BugKillSection:toggle({type = "toggle", name = "Bug / Kill Player - Car", flag = "BugPlayer_TheBronx", default = false, callback = function(state)
-                    Config.TheBronx.PlayerUtilities.BugPlayer = state
-                end})
-
-                BugKillSection:toggle({type = "toggle", name = "Auto Kill Player - Gun", flag = "AutoKillPlayer_TheBronx", default = false, callback = function(state)
-                    Config.TheBronx.PlayerUtilities.AutoKill = state
-                end})
-
-                BugKillSection:toggle({type = "toggle", name = "Auto Ragdoll Player - Gun", flag = "AutoRagdollPlayer_TheBronx", default = false, callback = function(state)
-                    Config.TheBronx.PlayerUtilities.AutoRagdoll = state
-                end})
-
-                local PassSection = Column:section({name = "Pass Options", size = 1, default = false, side = 'right'})
-
-                PassSection:button({name = "Pass to Selected Player", callback = function()
-                    local username = Config.TheBronx.PlayerUtilities.SelectedPlayer
-                    if username then
-                        Players.LocalPlayer:Chat("/passto " .. username)
-                    end
-                end})
-
-                PassSection:button({name = "Pass to Nearest Player", callback = function()
-                    local closest, minDist = nil, math.huge
-                    local myPos = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character.HumanoidRootPart.Position
-                    if not myPos then return end
-                    for _, player in ipairs(Players:GetPlayers()) do
-                        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                            local dist = (player.Character.HumanoidRootPart.Position - myPos).Magnitude
-                            if dist < minDist then
-                                minDist = dist
-                                closest = player.Name
-                            end
-                        end
-                    end
-                    if closest then
-                        Players.LocalPlayer:Chat("/passto " .. closest)
-                    end
-                end})
-
-                local PlayerActionsSection = Column:section({name = "Player Actions", size = 1, default = false, side = 'right'})
-
-                PlayerActionsSection:button({name = "Teleport To Player", callback = function()
-                    task.spawn(Teleport, Players[Config.TheBronx.PlayerUtilities.SelectedPlayer].Character.HumanoidRootPart.CFrame)
-                end})
-
-                PlayerActionsSection:button({name = "Down Player - Hold Gun", callback = function(state)
-                    pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "HumanoidRootPart", (Players[Config.TheBronx.PlayerUtilities.SelectedPlayer].Character.Humanoid.Health - 5))
-                end})
-
-                PlayerActionsSection:button({name = "Kill Player - Hold Gun", callback = function(state)
-                    pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "HumanoidRootPart", math.huge)
-                end})
-
-                PlayerActionsSection:button({name = "God Player - Hold Gun", callback = function(state)
-                    pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "HumanoidRootPart", math.sqrt(-1))
-                end})
-
-                PlayerActionsSection:button({name = "Fling Player - Hold Gun", callback = function(state)
-                    for Index=1, 50 do
-                        pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "RightUpperLeg", 0.01)
-                    end
-                end})
-
-                PlayerActionsSection:button({name = "God All Players - Hold Gun", callback = function()
-                    task.spawn(LPH_NO_VIRTUALIZE(function()
-                        for Index, Value in Players:GetPlayers() do
-                            if Value ~= LocalPlayer and Value.Character and Value.Character:FindFirstChild("Humanoid") and Value.Character:FindFirstChild("Humanoid").Health ~= 0 and not Value.Character:FindFirstChildOfClass("ForceField") and Value.Character:FindFirstChild("HumanoidRootPart") then
-                                pcall(kill_gun, Value.Name, "HumanoidRootPart", math.sqrt(-1))
-                                task.wait(0.1)
-                            end
-                        end
-                    end))
-                end})
-                
-                PlayerActionsSection:button({name = "Kill All Players - Hold Gun", callback = function()
-                    task.spawn(LPH_NO_VIRTUALIZE(function()
-                        for Index, Value in Players:GetPlayers() do
-                            if Value ~= LocalPlayer and Value.Character and Value.Character:FindFirstChild("Humanoid") and Value.Character:FindFirstChild("Humanoid").Health ~= 0 and not Value.Character:FindFirstChildOfClass("ForceField") and Value.Character:FindFirstChild("HumanoidRootPart") then
-                                pcall(kill_gun, Value.Name, "HumanoidRootPart", math.huge)
-                                task.wait(0.1)
-                            end
-                        end
-                    end))
-                end})
+    PassSection:button({name = "Pass to Nearest Player", callback = function()
+        local closest, minDist = nil, math.huge
+        local myPos = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character.HumanoidRootPart.Position
+        if not myPos then return end
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local dist = (player.Character.HumanoidRootPart.Position - myPos).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    closest = player.Name
+                end
             end
+        end
+        if closest then
+            Players.LocalPlayer:Chat("/passto " .. closest)
+        end
+    end})
+
+    local BugKillSection = Column:section({name = "Bug / Kill Options", size = 1, default = false, side = 'left'})
+    
+    BugKillSection:toggle({type = "toggle", name = "Bug / Kill Player - Car", flag = "BugPlayer_TheBronx", default = false, callback = function(state)
+        Config.TheBronx.PlayerUtilities.BugPlayer = state
+    end})
+
+    BugKillSection:toggle({type = "toggle", name = "Auto Kill Player - Gun", flag = "AutoKillPlayer_TheBronx", default = false, callback = function(state)
+        Config.TheBronx.PlayerUtilities.AutoKill = state
+    end})
+
+    BugKillSection:toggle({type = "toggle", name = "Auto Ragdoll Player - Gun", flag = "AutoRagdollPlayer_TheBronx", default = false, callback = function(state)
+        Config.TheBronx.PlayerUtilities.AutoRagdoll = state
+    end})
+
+    local PlayerActionsSection = Column:section({name = "Player Actions", size = 1, default = false, side = 'left'})
+
+    PlayerActionsSection:button({name = "Teleport To Player", callback = function()
+        task.spawn(Teleport, Players[Config.TheBronx.PlayerUtilities.SelectedPlayer].Character.HumanoidRootPart.CFrame)
+    end})
+
+    PlayerActionsSection:button({name = "Down Player - Hold Gun", callback = function(state)
+        pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "HumanoidRootPart", (Players[Config.TheBronx.PlayerUtilities.SelectedPlayer].Character.Humanoid.Health - 5))
+    end})
+
+    PlayerActionsSection:button({name = "Kill Player - Hold Gun", callback = function(state)
+        pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "HumanoidRootPart", math.huge)
+    end})
+
+    PlayerActionsSection:button({name = "God Player - Hold Gun", callback = function(state)
+        pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "HumanoidRootPart", math.sqrt(-1))
+    end})
+
+    PlayerActionsSection:button({name = "Fling Player - Hold Gun", callback = function(state)
+        for Index=1, 50 do
+            pcall(kill_gun, Config.TheBronx.PlayerUtilities.SelectedPlayer, "RightUpperLeg", 0.01)
+        end
+    end})
+
+    PlayerActionsSection:button({name = "God All Players - Hold Gun", callback = function()
+        task.spawn(LPH_NO_VIRTUALIZE(function()
+            for Index, Value in Players:GetPlayers() do
+                if Value ~= LocalPlayer and Value.Character and Value.Character:FindFirstChild("Humanoid") and Value.Character:FindFirstChild("Humanoid").Health ~= 0 and not Value.Character:FindFirstChildOfClass("ForceField") and Value.Character:FindFirstChild("HumanoidRootPart") then
+                    pcall(kill_gun, Value.Name, "HumanoidRootPart", math.sqrt(-1))
+                    task.wait(0.1)
+                end
+            end
+        end))
+    end})
+
+    PlayerActionsSection:button({name = "Kill All Players - Hold Gun", callback = function()
+        task.spawn(LPH_NO_VIRTUALIZE(function()
+            for Index, Value in Players:GetPlayers() do
+                if Value ~= LocalPlayer and Value.Character and Value.Character:FindFirstChild("Humanoid") and Value.Character:FindFirstChild("Humanoid").Health ~= 0 and not Value.Character:FindFirstChildOfClass("ForceField") and Value.Character:FindFirstChild("HumanoidRootPart") then
+                    pcall(kill_gun, Value.Name, "HumanoidRootPart", math.huge)
+                    task.wait(0.1)
+                end
+            end
+        end))
+    end})
+end
                 
             do -- \\ Misc Tab
                 local Column = MiscTab:column({})
